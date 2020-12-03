@@ -1,0 +1,91 @@
+#include <iostream>
+#include <random>
+#include <ctime>
+using namespace std;
+
+
+class Ninjutsu{													//忍术类 
+	public:
+		int damage, speed, consume, attribute;	//忍术的伤害，速度，查克拉消耗量 ，忍术属性
+		int grade;//忍术等级
+		int useCode;//结印方法 
+		string name;
+};
+
+class FireNJS: public Ninjutsu{
+	public:
+		FireNJS(int d,int use, string n): Ninjutsu(){
+			useCode = use;
+			damage = d;
+			name = n;
+		}
+};
+FireNJS haohuoqiu(10,456,"豪火球");
+
+class Ninja {											//忍者类 
+	public:
+		int MAXchakra, MAXlife, money, damage, exp=0;//最大查克拉，最大生命值，金币，攻击力
+		int life, chakra;//当前生命值与当前查克拉。 
+		string name; //姓名 
+		vector<int> Ninjs;//习得的忍术 
+		Ninja(string na){
+			name = na;
+		}
+		Ninja(int c, int l, int m, int d){
+			chakra=c; life=l; money=m; damage=d;
+		}
+		//装备，忍术 ，查克拉属性 
+
+		void randomAttribute(){	//随机生成忍者属性
+			srand(time(0));
+			chakra = rand()%10;
+			life = rand()%10+1;
+			money = rand()%10;
+			damage = rand()%10+1;
+			MAXchakra = chakra;
+			MAXlife = life; 
+		}
+		void printAttribute(){//打印忍者的属性
+			cout<<name<<ends
+				<<"生命值："<<life<<ends
+				<<"查克拉："<<chakra<<ends
+				<<"攻击力："<<damage<<ends
+				<<"金币："<<money<<ends
+				<<"经验值："<<exp<<endl;
+		}
+		void attack(Ninja &nj){//对nj进行一次普通攻击 
+			nj.life-= damage;
+			cout<<ends<<"-"<<name<<"发起攻击造成"<<damage<<"点伤害"<<endl;
+		}
+		void getExp(int e, int m){//结算经验和金币 
+			 exp+=e;
+			 money+=m;
+			 cout<<"你获得"<<e<<"点经验,并搜刮了"<<m<<"个金币."<<endl;
+		}
+		void getNinjutsu(Ninjutsu nj){	//习得忍术
+			Ninjs.push_back(nj.useCode);
+			cout<<"你已成功习得"<<nj.name<<endl;
+		} 
+		void useNinjs(Ninja &n1, Ninjutsu nj){	//使用忍术，n1为受害者,nj为忍术 
+			chakra-= nj.consume;
+			n1.life-=nj.damage;
+			cout<<"你使用"<<nj.name<<"造成了"<<nj.damage<<"点伤害"<<endl;
+		}
+};
+
+class DefectNinja: public Ninja{							//叛忍类--继承自忍者类 
+	public: 
+		DefectNinja(string nn):Ninja(nn){
+			name = nn;
+		}
+		void randomAttribute(){	//随机生成忍者属性
+			srand(time(0));
+			chakra = rand()%10;
+			life = rand()%10+1;
+			money = rand()%10;
+			damage = rand()%10+1;
+			money = rand()%10;
+			exp = life/2 + damage/3 + chakra/3; //杀死每个叛忍获得的经验值 
+		}
+};
+
