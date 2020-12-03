@@ -1,0 +1,167 @@
+#include <iostream>
+#include <random>
+#include <ctime>
+#include "class.cpp" 
+using namespace std;
+
+#define MAPX 2	//地图最大高度 
+#define MAPY 2	//地图最大宽度 
+
+
+void creatMap(int n);										//创建n*n的地图--暂时无用 
+void move(char cmd,int &x, int &y, Ninja &nj, int &tag);	//移动或者其他命令，如查看当前状态 
+void Fight(DefectNinja &n1, Ninja &n2);						//战斗 
+void event(int x, int y, int map[MAPX][MAPY], Ninja &nn);	//触发该点所在事件 
+int checkCode(Ninja n1, int code);							//检查结印的忍术是否存在与习得的忍术中 
+int main(){
+	system("title NG");
+	int map[2][2] = {
+		{0,1},
+		{2,4}
+	};		//创建地图，用每个点的值表示事件，例如map[0][1]=1, 1表示碰到平民 
+	char cmd;
+	int x=0, y=0;
+	Ninja ninja1("十苋");
+	ninja1.randomAttribute();
+	ninja1.printAttribute();//以上三行初始化玩家 
+	
+	ninja1.life=100;
+	cin>>cmd;
+	while (cmd != 'p'){
+		int tag = 0;
+		move(cmd,x,y,ninja1,tag);
+		if(tag<1)
+			event(x,y, map, ninja1);
+		cout<<"接下来干嘛？"<<endl;
+		cin>>cmd;
+	} 
+	return 0;
+}
+
+//移动事件
+void move(char cmd,int &x, int &y, Ninja &nj, int &tag){	//tag的作用：如果移动无效（tag<1），则不触发接下来的event 
+	switch(cmd){
+		case 'w': 
+			if( x-1 >= 0){
+				x--;
+				cout<<"向上移动,当前坐标为（"<<x<<","<<y<<")"<<endl;
+			}
+			else{
+				cout<<"那边没路了，别走了！"<<endl;
+				tag++;
+			}
+			break;
+		case 'a':
+			if( 0 <= y-1){
+				y--;
+				cout<<"向左移动,当前坐标为（"<<x<<","<<y<<")"<<endl;
+			}
+			else{
+				cout<<"那边没路了，别走了！"<<endl;
+				tag++;
+			}
+			break;
+		case 's':
+			if( MAPX > x+1){
+				x++;
+				cout<<"向下移动,当前坐标为（"<<x<<","<<y<<")"<<endl;
+			}
+			else{
+				cout<<"那边没路了，别走了！"<<endl;
+				tag++;
+			}
+			break;
+		case 'd': 
+			if( MAPY > y+1){
+				y++;
+				cout<<"向右移动,当前坐标为（"<<x<<","<<y<<")"<<endl;
+			}
+			else{
+				cout<<"那边没路了，别走了！"<<endl;
+				tag++;
+			}
+			break;
+		case 'l':	//查看人物状态 
+			nj.printAttribute();
+			tag++;
+			break;
+		case 'r':	//用1金币恢复10生命，10查克拉；
+			tag++;
+			nj.money--;
+			if( nj.life+10 > nj.MAXlife)
+				nj.life = nj.MAXchakra;
+			else 
+				nj.life+=10;
+			if( nj.chakra+10 > nj.MAXchakra)
+				nj.chakra = nj.MAXchakra;
+			else
+				nj.chakra +=10;
+			cout<<"恢复10点生命值和查克拉！"<<endl;
+	}
+} 
+
+//战斗事件
+void Fight(DefectNinja &n1, Ninja &n2){	//规定n1为敌方，n2为我方 
+	while(n1.life>0 && n2.life>0){
+		if(n1.life>0)
+			n1.attack(n2);
+		if(n2.life>0){
+			int cmd1;
+			int cmd2;
+			cout<<"怎么出招？"<<endl;
+			cin>>cmd1;
+			switch(cmd1){
+				case 1:
+					n2.attack(n1);
+					break;
+				case 2:
+					cout<<"结印："<<endl;
+					cin>>cmd2;
+					if(cmd2)
+						n2.useNinjs(n1, haohuoqiu);
+					break;
+			}
+		}
+	}
+	if(n1.life<=0){
+		cout<<"敌方死亡！"<<endl;
+		n2.getExp(n1.exp, n1.money);
+	} 
+	else{
+		cout<<"你屎了，GAME OVER!"<<endl;
+		exit(0);
+	}
+} 
+
+int checkCode(Ninja n1, int code){
+	for(int i=0; n1.Ninjs.size(); i++){
+		if( n1.Ninjs.at(i) == code)
+			return 1;
+	}
+	return 0;
+}
+
+//触发坐标为（x，y）的事件 
+void event(int x, int y, int map[MAPX][MAPY], Ninja &nn){
+	switch(map[x][y]){
+		case 1:
+			cout<<"碰到了一个平民。"<<endl;
+			break;
+		case 4:
+			cout<<"你来到了忍术堂!--有以下忍术可以购买："<<endl;
+			cout<<ends<<"-火遁-豪火球之术(1)"<<endl; 
+			break;	
+		case 2:
+			cout<<"碰到了一个叛忍！"<<endl;
+			DefectNinja enemy("cxf");
+			enemy.randomAttribute();
+			enemy.printAttribute();
+			Fight(enemy, nn);
+			break;	
+	}
+}
+
+//生成地点事件
+//判断行进路线
+//判断忍者行为
+//结算行为后果 
